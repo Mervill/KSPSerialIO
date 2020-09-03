@@ -1,17 +1,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
 using System.Threading;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
-
-using System.Text.RegularExpressions;
 using OpenNETCF.IO.Ports;
 using UnityEngine;
-using KSP.IO;
 using KSP.UI.Screens;
 
 namespace KSPSerialIO
