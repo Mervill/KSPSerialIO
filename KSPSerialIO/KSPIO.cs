@@ -16,252 +16,6 @@ using KSP.UI.Screens;
 
 namespace KSPSerialIO
 {
-    #region Structs
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct VesselData
-    {
-        public byte id;              //1
-        public float AP;             //2
-        public float PE;             //3
-        public float SemiMajorAxis;  //4
-        public float SemiMinorAxis;  //5
-        public float VVI;            //6
-        public float e;              //7
-        public float inc;            //8
-        public float G;              //9
-        public int TAp;              //10
-        public int TPe;              //11
-        public float TrueAnomaly;    //12
-        public float Density;        //13
-        public int period;           //14
-        public float RAlt;           //15
-        public float Alt;            //16
-        public float Vsurf;          //17
-        public float Lat;            //18
-        public float Lon;            //19
-        public float LiquidFuelTot;  //20
-        public float LiquidFuel;     //21
-        public float OxidizerTot;    //22
-        public float Oxidizer;       //23
-        public float EChargeTot;     //24
-        public float ECharge;        //25
-        public float MonoPropTot;    //26
-        public float MonoProp;       //27
-        public float IntakeAirTot;   //28
-        public float IntakeAir;      //29
-        public float SolidFuelTot;   //30
-        public float SolidFuel;      //31
-        public float XenonGasTot;    //32
-        public float XenonGas;       //33
-        public float LiquidFuelTotS; //34
-        public float LiquidFuelS;    //35
-        public float OxidizerTotS;   //36
-        public float OxidizerS;      //37
-        public UInt32 MissionTime;   //38
-        public float deltaTime;      //39
-        public float VOrbit;         //40
-        public UInt32 MNTime;        //41
-        public float MNDeltaV;       //42
-        public float Pitch;          //43
-        public float Roll;           //44
-        public float Heading;        //45
-        public UInt16 ActionGroups;  //46  status bit order:SAS, RCS, Light, Gear, Brakes, Abort, Custom01 - 10 
-        public byte SOINumber;       //47  SOI Number (decimal format: sun-planet-moon e.g. 130 = kerbin, 131 = mun)
-        public byte MaxOverHeat;     //48  Max part overheat (% percent)
-        public float MachNumber;     //49
-        public float IAS;            //50  Indicated Air Speed
-        public byte CurrentStage;    //51  Current stage number
-        public byte TotalStage;      //52  TotalNumber of stages
-        public float TargetDist;     //53  Distance to targeted vessel (m)
-        public float TargetV;        //54  Target vessel relative velocity (m/s)
-        public byte NavballSASMode;  //55  Combined byte for navball target mode and SAS mode
-                                     // First four bits indicate AutoPilot mode:
-                                     // 0 SAS is off  //1 = Regular Stability Assist //2 = Prograde
-                                     // 3 = RetroGrade //4 = Normal //5 = Antinormal //6 = Radial In
-                                     // 7 = Radial Out //8 = Target //9 = Anti-Target //10 = Maneuver node
-                                     // Last 4 bits set navball mode. (0=ignore,1=ORBIT,2=SURFACE,3=TARGET)
-        public short ProgradePitch;  //56 Pitch   Of the Prograde Vector;  int_16 ***Changed: now fix point, actual angle = angle/50*** used to be (-0x8000(-360 degrees) to 0x7FFF(359.99ish degrees)); 
-        public short ProgradeHeading;//57 Heading Of the Prograde Vector;  see above for range   (Prograde vector depends on navball mode, eg Surface/Orbit/Target)
-        public short ManeuverPitch;  //58 Pitch   Of the Maneuver Vector;  see above for range;  (0 if no Maneuver node)
-        public short ManeuverHeading;//59 Heading Of the Maneuver Vector;  see above for range;  (0 if no Maneuver node)
-        public short TargetPitch;    //60 Pitch   Of the Target   Vector;  see above for range;  (0 if no Target)
-        public short TargetHeading;  //61 Heading Of the Target   Vector;  see above for range;  (0 if no Target)
-        public short NormalHeading;  //62 Normal Of the Prograde Vector;  see above for range;  (Pitch of the Heading Vector is always 0)
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct HandShakePacket
-    {
-        public byte id;
-        public byte M1;
-        public byte M2;
-        public byte M3;
-    }
-
-    [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct ControlPacket
-    {
-        public byte id;
-        public byte MainControls;                  //SAS RCS Lights Gear Brakes Precision Abort Stage 
-        public byte Mode;                          //0 = stage, 1 = docking, 2 = map
-        public ushort ControlGroup;                //control groups 1-10 in 2 bytes
-        public byte NavballSASMode;                //AutoPilot mode (See above for AutoPilot modes)(Ignored if the equal to zero or out of bounds (>10)) //Navball mode
-        public byte AdditionalControlByte1;
-        public short Pitch;                        //-1000 -> 1000
-        public short Roll;                         //-1000 -> 1000
-        public short Yaw;                          //-1000 -> 1000
-        public short TX;                           //-1000 -> 1000
-        public short TY;                           //-1000 -> 1000
-        public short TZ;                           //-1000 -> 1000
-        public short WheelSteer;                   //-1000 -> 1000
-        public short Throttle;                     // 0 -> 1000
-        public short WheelThrottle;                // 0 -> 1000
-    };
-
-    public struct VesselControls
-    {
-        public Boolean SAS;
-        public Boolean RCS;
-        public Boolean Lights;
-        public Boolean Gear;
-        public Boolean Brakes;
-        public Boolean Precision;
-        public Boolean Abort;
-        public Boolean Stage;
-        public int Mode;
-        public int SASMode;
-        public int SpeedMode;
-        public Boolean[] ControlGroup;
-        public float Pitch;
-        public float Roll;
-        public float Yaw;
-        public float TX;
-        public float TY;
-        public float TZ;
-        public float WheelSteer;
-        public float Throttle;
-        public float WheelThrottle;
-    };
-
-    public struct IOResource
-    {
-        public float Max;
-        public float Current;
-    }
-
-    public struct NavHeading
-    {
-        public float Pitch, Heading;
-        /*  public NavHeading(float Pitch, float Heading)
-          {
-              this.Pitch = Pitch;
-              this.Heading = Heading;
-          }*/
-    }
-
-    #endregion
-
-    enum enumAG : int
-    {
-        SAS,
-        RCS,
-        Light,
-        Gear,
-        Brakes,
-        Abort,
-        Custom01,
-        Custom02,
-        Custom03,
-        Custom04,
-        Custom05,
-        Custom06,
-        Custom07,
-        Custom08,
-        Custom09,
-        Custom10,
-    };
-
-    [KSPAddon(KSPAddon.Startup.MainMenu, false)]
-    public class SettingsNStuff : MonoBehaviour
-    {
-
-        public static PluginConfiguration cfg = PluginConfiguration.CreateForType<SettingsNStuff>();
-        public static string DefaultPort;
-        public static double refreshrate;
-        public static int HandshakeDelay;
-        public static int HandshakeDisable;
-        public static int BaudRate;
-        // Throttle and axis controls have the following settings:
-        // 0: The internal value (supplied by KSP) is always used.
-        // 1: The external value (read from serial packet) is always used.
-        // 2: If the internal value is not zero use it, otherwise use the external value.
-        // 3: If the external value is not zero use it, otherwise use the internal value.        
-        public static int PitchEnable;
-        public static int RollEnable;
-        public static int YawEnable;
-        public static int TXEnable;
-        public static int TYEnable;
-        public static int TZEnable;
-        public static int WheelSteerEnable;
-        public static int ThrottleEnable;
-        public static int WheelThrottleEnable;
-        public static double SASTol;
-
-        void Awake()
-        {
-            //cfg["refresh"] = 0.08;
-            //cfg["DefaultPort"] = "COM1";
-            //cfg["HandshakeDelay"] = 2500;
-            print("KSPSerialIO: Loading settings...");
-
-            cfg.load();
-            DefaultPort = cfg.GetValue<string>("DefaultPort");
-            print("KSPSerialIO: Default Port = " + DefaultPort);
-
-            refreshrate = cfg.GetValue<double>("refresh");
-            print("KSPSerialIO: Refreshrate = " + refreshrate.ToString());
-
-            BaudRate = cfg.GetValue<int>("BaudRate");
-            print("KSPSerialIO: BaudRate = " + BaudRate.ToString());
-
-            HandshakeDelay = cfg.GetValue<int>("HandshakeDelay");
-            print("KSPSerialIO: Handshake Delay = " + HandshakeDelay.ToString());
-
-            HandshakeDisable = cfg.GetValue<int>("HandshakeDisable");
-            print("KSPSerialIO: Handshake Disable = " + HandshakeDisable.ToString());
-
-            PitchEnable = cfg.GetValue<int>("PitchEnable");
-            print("KSPSerialIO: Pitch Enable = " + PitchEnable.ToString());
-
-            RollEnable = cfg.GetValue<int>("RollEnable");
-            print("KSPSerialIO: Roll Enable = " + RollEnable.ToString());
-
-            YawEnable = cfg.GetValue<int>("YawEnable");
-            print("KSPSerialIO: Yaw Enable = " + YawEnable.ToString());
-
-            TXEnable = cfg.GetValue<int>("TXEnable");
-            print("KSPSerialIO: Translate X Enable = " + TXEnable.ToString());
-
-            TYEnable = cfg.GetValue<int>("TYEnable");
-            print("KSPSerialIO: Translate Y Enable = " + TYEnable.ToString());
-
-            TZEnable = cfg.GetValue<int>("TZEnable");
-            print("KSPSerialIO: Translate Z Enable = " + TZEnable.ToString());
-
-            WheelSteerEnable = cfg.GetValue<int>("WheelSteerEnable");
-            print("KSPSerialIO: Wheel Steering Enable = " + WheelSteerEnable.ToString());
-
-            ThrottleEnable = cfg.GetValue<int>("ThrottleEnable");
-            print("KSPSerialIO: Throttle Enable = " + ThrottleEnable.ToString());
-
-            WheelThrottleEnable = cfg.GetValue<int>("WheelThrottleEnable");
-            print("KSPSerialIO: Wheel Throttle Enable = " + WheelThrottleEnable.ToString());
-
-            SASTol = cfg.GetValue<double>("SASTol");
-            print("KSPSerialIO: SAS Tol = " + SASTol.ToString());
-        }
-    }
-
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class KSPSerialPort : MonoBehaviour
     {
@@ -670,7 +424,7 @@ namespace KSPSerialIO
             VControls.TY = (float)CPacket.TY / 1000.0F;
             VControls.TZ = (float)CPacket.TZ / 1000.0F;
             VControls.WheelSteer = (float)CPacket.WheelSteer / 1000.0F;
-            VControls.Throttle = (float)CPacket.Throttle / 1000.0F;
+            VControls.MainThrottle = (float)CPacket.MainThrottle / 1000.0F;
             VControls.WheelThrottle = (float)CPacket.WheelThrottle / 1000.0F;
             VControls.SASMode = (int)CPacket.NavballSASMode & 0x0F;
             VControls.SpeedMode = (int)(CPacket.NavballSASMode >> 4);
@@ -986,22 +740,22 @@ namespace KSPSerialIO
                     KSPSerialPort.VData.ManeuverHeading = FloatAngleToFixed_16(Maneuver.Heading);
                     KSPSerialPort.VData.ManeuverPitch = FloatAngleToFixed_16(Maneuver.Pitch);
 
-                    KSPSerialPort.ControlStatus((int)enumAG.SAS, ActiveVessel.ActionGroups[KSPActionGroup.SAS]);
-                    KSPSerialPort.ControlStatus((int)enumAG.RCS, ActiveVessel.ActionGroups[KSPActionGroup.RCS]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Light, ActiveVessel.ActionGroups[KSPActionGroup.Light]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Gear, ActiveVessel.ActionGroups[KSPActionGroup.Gear]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Brakes, ActiveVessel.ActionGroups[KSPActionGroup.Brakes]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Abort, ActiveVessel.ActionGroups[KSPActionGroup.Abort]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom01, ActiveVessel.ActionGroups[KSPActionGroup.Custom01]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom02, ActiveVessel.ActionGroups[KSPActionGroup.Custom02]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom03, ActiveVessel.ActionGroups[KSPActionGroup.Custom03]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom04, ActiveVessel.ActionGroups[KSPActionGroup.Custom04]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom05, ActiveVessel.ActionGroups[KSPActionGroup.Custom05]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom06, ActiveVessel.ActionGroups[KSPActionGroup.Custom06]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom07, ActiveVessel.ActionGroups[KSPActionGroup.Custom07]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom08, ActiveVessel.ActionGroups[KSPActionGroup.Custom08]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom09, ActiveVessel.ActionGroups[KSPActionGroup.Custom09]);
-                    KSPSerialPort.ControlStatus((int)enumAG.Custom10, ActiveVessel.ActionGroups[KSPActionGroup.Custom10]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.SAS, ActiveVessel.ActionGroups[KSPActionGroup.SAS]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.RCS, ActiveVessel.ActionGroups[KSPActionGroup.RCS]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Light, ActiveVessel.ActionGroups[KSPActionGroup.Light]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Gear, ActiveVessel.ActionGroups[KSPActionGroup.Gear]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Brakes, ActiveVessel.ActionGroups[KSPActionGroup.Brakes]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Abort, ActiveVessel.ActionGroups[KSPActionGroup.Abort]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom01, ActiveVessel.ActionGroups[KSPActionGroup.Custom01]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom02, ActiveVessel.ActionGroups[KSPActionGroup.Custom02]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom03, ActiveVessel.ActionGroups[KSPActionGroup.Custom03]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom04, ActiveVessel.ActionGroups[KSPActionGroup.Custom04]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom05, ActiveVessel.ActionGroups[KSPActionGroup.Custom05]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom06, ActiveVessel.ActionGroups[KSPActionGroup.Custom06]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom07, ActiveVessel.ActionGroups[KSPActionGroup.Custom07]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom08, ActiveVessel.ActionGroups[KSPActionGroup.Custom08]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom09, ActiveVessel.ActionGroups[KSPActionGroup.Custom09]);
+                    KSPSerialPort.ControlStatus((int)ActionGroupId.Custom10, ActiveVessel.ActionGroups[KSPActionGroup.Custom10]);
 
                     if (ActiveVessel.orbit.referenceBody != null)
                     {
@@ -1382,18 +1136,18 @@ namespace KSPSerialIO
             switch (SettingsNStuff.ThrottleEnable)
             {
                 case 1:
-                    s.mainThrottle = KSPSerialPort.VControls.Throttle;
+                    s.mainThrottle = KSPSerialPort.VControls.MainThrottle;
                     break;
                 case 2:
                     if (s.mainThrottle == 0)
                     {
-                        s.mainThrottle = KSPSerialPort.VControls.Throttle;
+                        s.mainThrottle = KSPSerialPort.VControls.MainThrottle;
                     }
                     break;
                 case 3:
-                    if (KSPSerialPort.VControls.Throttle != 0)
+                    if (KSPSerialPort.VControls.MainThrottle != 0)
                     {
-                        s.mainThrottle = KSPSerialPort.VControls.Throttle;
+                        s.mainThrottle = KSPSerialPort.VControls.MainThrottle;
                     }
                     break;
                 default:
